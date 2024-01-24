@@ -224,6 +224,10 @@ func (c *Conn) SyscallConn() (syscall.RawConn, error) {
 	return c.rc, nil
 }
 
+func (c *Conn) File() *os.File {
+	return c.fd
+}
+
 // Socket wraps the socket(2) system call to produce a Conn. domain, typ, and
 // proto are passed directly to socket(2), and name should be a unique name for
 // the socket type such as "netlink" or "vsock".

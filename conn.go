@@ -17,6 +17,7 @@ import (
 var _ interface {
 	io.ReadWriteCloser
 	syscall.Conn
+	Fd() int
 	SetDeadline(t time.Time) error
 	SetReadDeadline(t time.Time) error
 	SetWriteDeadline(t time.Time) error
@@ -44,8 +45,9 @@ type Conn struct {
 
 	// Provides access to the underlying file registered with the runtime
 	// network poller, and arbitrary raw I/O calls.
-	fd *os.File
-	rc syscall.RawConn
+	fd  *os.File
+	fdn int
+	rc  syscall.RawConn
 }
 
 // facts contains facts about a Conn.
@@ -80,6 +82,10 @@ type Config struct {
 	// CAP_SYS_ADMIN are required), and most applications should leave this set
 	// to 0.
 	NetNS int
+}
+
+func (c *Conn) Fd() int {
+	return c.fdn
 }
 
 // High-level methods which provide convenience over raw system calls.
@@ -375,6 +381,7 @@ func New(fd int, name string) (*Conn, error) {
 	c := &Conn{
 		name: name,
 		fd:   f,
+		fdn:  fd,
 		rc:   rc,
 	}
 
